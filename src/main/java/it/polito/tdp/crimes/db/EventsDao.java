@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import it.polito.tdp.crimes.model.Event;
@@ -56,5 +57,81 @@ public class EventsDao {
 			return null ;
 		}
 	}
-
+	public List<Integer> getAnni(){
+		String sql = "SELECT DISTINCT YEAR(reported_date) as anno FROM events";
+		List<Integer> result = new ArrayList<Integer>();
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+					result.add(res.getInt("anno"));			
+			}
+			conn.close();
+			Collections.sort(result);
+			return result;
+		} catch(Throwable t) {
+			t.printStackTrace();
+			return null;
+		}
+	}
+	
+	public List<Integer> getVertici(){
+		String sql = "SELECT DISTINCT district_id as vertici FROM events";
+		List<Integer> result = new ArrayList<Integer>();
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			ResultSet res = st.executeQuery() ;
+			while(res.next()) {
+					result.add(res.getInt("vertici"));
+			}
+			conn.close();
+			return result;
+		} catch(Throwable t) {
+			t.printStackTrace();
+			return null;
+		}
+	}
+	public Double getLatMedia(Integer anno, Integer district) {
+		String sql = "SELECT AVG(geo_lat) as lat FROM events where year(reported_date) = ? and district_id = ? ";
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setInt(1, anno);
+			st.setInt(2, district);
+			ResultSet res = st.executeQuery() ;
+			if(res.next()) {
+				conn.close();
+				return res.getDouble("lat");
+			}else {
+				conn.close();
+				return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null ;
+		}
+	}
+	public Double getLonMedia(Integer anno, Integer district) {
+		String sql = "SELECT avg(geo_lon) as lon FROM events where year(reported_date)=? and district_id = ? ";
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setInt(1, anno);
+			st.setInt(2, district);
+			ResultSet res = st.executeQuery() ;
+			if(res.next()) {
+				conn.close();
+				return res.getDouble("lon");
+			}else {
+				conn.close();
+				return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null ;
+		}
+	}
 }
